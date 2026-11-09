@@ -476,10 +476,7 @@ interface PvoilScrapedResult {
 
 let inMemoryPvoilCache: { data: PvoilScrapedResult; expiresAt: number } | null = null;
 
-function getCachedPvoil(): PvoilScrapedResult | null {
-  if (inMemoryPvoilCache && Date.now() < inMemoryPvoilCache.expiresAt) {
-    return inMemoryPvoilCache.data;
-  }
+function getDiskFallbackPvoil(): PvoilScrapedResult | null {
   try {
     if (fs.existsSync(PVOIL_CACHE_FILE)) {
       const content = fs.readFileSync(PVOIL_CACHE_FILE, 'utf-8');
@@ -497,7 +494,7 @@ function getCachedPvoil(): PvoilScrapedResult | null {
 function savePvoilCache(result: PvoilScrapedResult) {
   inMemoryPvoilCache = {
     data: result,
-    expiresAt: Date.now() + 5 * 60 * 1000, // 5 min TTL
+    expiresAt: Date.now() + 15 * 1000, // 15-second real-time in-memory cache to debounce bursts
   };
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -521,13 +518,15 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
       path: reqPath,
       method: 'GET',
       rejectUnauthorized: false,
-      timeout: 7000,
+      timeout: 5000,
       headers: {
         Host: 'www.pvoil.com.vn',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8',
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
       },
     };
 
@@ -592,13 +591,24 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
     request.on('error', (err) => reject(err));
     request.on('timeout', () => {
       request.destroy();
-      reject(new Error('Quá thời gian kết nối máy chủ PVOIL (timeout 7s)'));
+      reject(new Error('Quá thời gian kết nối máy chủ PVOIL (timeout 5s)'));
     });
     request.end();
   });
 }
 
-// Endpoint lấy dữ liệu giá xăng dầu PVOil trực tiếp từ https://www.pvoil.com.vn/tin-gia-xang-dau
+// Background auto-sync every 60s
+setInterval(() => {
+  fetchPvoilFromOrigin()
+    .then((res) => {
+      savePvoilCache(res);
+    })
+    .catch((err) => {
+      // background sync fail - silent fallback
+    });
+}, 60 * 1000);
+
+// Endpoint lấy dữ liệu giá xăng dầu PVOil trực tiếp từ https://www.pvoil.com.vn/tin-gia-xang-dau theo thời gian thực
 app.get('/api/pvoil/prices', async (req, res) => {
   const targetDate = typeof req.query.date === 'string' ? req.query.date.trim() : undefined;
   const forceRefresh = req.query.refresh === 'true' || req.query.refresh === '1';
@@ -608,14 +618,13 @@ app.get('/api/pvoil/prices', async (req, res) => {
     let tierUsed = 0;
     let fromCache = false;
 
-    // Check cache for default query
-    if (!targetDate && !forceRefresh) {
-      scraped = getCachedPvoil();
-      if (scraped) {
-        fromCache = true;
-      }
+    // Use fast 15-second in-memory cache only if not a custom date and not forced refresh
+    if (!targetDate && !forceRefresh && inMemoryPvoilCache && Date.now() < inMemoryPvoilCache.expiresAt) {
+      scraped = inMemoryPvoilCache.data;
+      fromCache = true;
     }
 
+    // Always fetch live from origin if no valid in-memory cache or custom date or force refresh
     if (!scraped) {
       try {
         scraped = await fetchPvoilFromOrigin(targetDate);
@@ -624,8 +633,8 @@ app.get('/api/pvoil/prices', async (req, res) => {
           savePvoilCache(scraped);
         }
       } catch (originErr: any) {
-        console.warn('Origin fetch failed, checking fallback cache:', originErr.message);
-        scraped = getCachedPvoil();
+        console.warn('Real-time origin fetch failed, using fallback disk cache:', originErr.message);
+        scraped = getDiskFallbackPvoil();
         if (scraped) {
           tierUsed = 1;
           fromCache = true;
@@ -635,16 +644,16 @@ app.get('/api/pvoil/prices', async (req, res) => {
       }
     }
 
-    // Default prices if all fail
-    let do05Price = 30240;
-    let do001Price = 31640;
-    let ron95Price = 25730;
-    let ron92Price = 26020;
-    let do05Diff = '+1040';
-    let do001Diff = '+1040';
-    let ron95Diff = '+870';
-    let ron92Diff = '+1010';
-    let effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 29/10/2026';
+    // Current latest prices on PVOIL: 05/11/2026 (Giảm)
+    let do05Price = 28690;
+    let do001Price = 30090;
+    let ron95Price = 21150;
+    let ron92Price = 20890;
+    let do05Diff = '-180';
+    let do001Diff = '-180';
+    let ron95Diff = '-2080';
+    let ron92Diff = '-2310';
+    let effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 05/11/2026';
     let dateOptions: Array<{ value: string; label: string }> = [];
 
     if (scraped?.items?.length) {
@@ -652,7 +661,7 @@ app.get('/api/pvoil/prices', async (req, res) => {
       if (scraped.dateOptions && scraped.dateOptions.length > 0) {
         dateOptions = scraped.dateOptions;
       } else {
-        const cached = getCachedPvoil();
+        const cached = getDiskFallbackPvoil();
         if (cached?.dateOptions) dateOptions = cached.dateOptions;
       }
 

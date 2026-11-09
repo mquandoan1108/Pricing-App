@@ -48,7 +48,7 @@ function AppContent() {
     fromProvinceId: 'SG',
     toProvinceId: 'HN', // Mẫu Nam -> Bắc (1.720km)
     km: 1720,
-    currentDieselPrice: 30240, // Dầu DO 0,05S-II trực tiếp từ link https://www.pvoil.com.vn/tin-gia-xang-dau
+    currentDieselPrice: 28690, // Dầu DO 0,05S-II trực tiếp từ link https://www.pvoil.com.vn/tin-gia-xang-dau (Đã giảm)
     baseDieselPrice: BASE_DIESEL_PRICE, // 21860
     coolingHours: 0,
     retentionDays: 0,
@@ -74,7 +74,7 @@ function AppContent() {
 
   // Live PVOIL state from https://www.pvoil.com.vn/tin-gia-xang-dau
   const [pvoilProducts, setPvoilProducts] = useState<PetrolimexProduct[]>(PVOIL_PRODUCTS);
-  const [pvoilEffectiveTime, setPvoilEffectiveTime] = useState<string>('Giá điều chỉnh lúc 15:00 ngày 29/10/2026');
+  const [pvoilEffectiveTime, setPvoilEffectiveTime] = useState<string>('Giá điều chỉnh lúc 15:00 ngày 05/11/2026');
   const [pvoilDateOptions, setPvoilDateOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [selectedPvoilDate, setSelectedPvoilDate] = useState<string>('');
 
@@ -104,7 +104,7 @@ function AppContent() {
       const url = new URL('/api/pvoil/prices', window.location.origin);
       if (dateParam) url.searchParams.set('date', dateParam);
       if (forceRefresh) url.searchParams.set('refresh', 'true');
-      const res = await fetch(url.toString());
+      const res = await fetch(url.toString(), { cache: 'no-cache' });
       const data = await res.json();
       if (data && data.success && data.products) {
         const mappedProducts: PetrolimexProduct[] = data.products.map((p: any) => ({
@@ -140,8 +140,18 @@ function AppContent() {
     }
   }, []);
 
+  // Real-time polling & window focus sync
   useEffect(() => {
-    fetchPvoil();
+    fetchPvoil(undefined, true);
+    const interval = setInterval(() => {
+      fetchPvoil(undefined, false);
+    }, 20000);
+    const handleFocus = () => fetchPvoil(undefined, true);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [fetchPvoil]);
 
   // Fetch pending registrations and total user count for Admin
@@ -273,8 +283,11 @@ function AppContent() {
               <span>Tính Giá Cước Vận Chuyển</span>
             </button>
             <button
-              onClick={() => setActiveTab('pvoil')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              onClick={() => {
+                setActiveTab('pvoil');
+                fetchPvoil(undefined, true);
+              }}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'pvoil'
                   ? 'bg-[#EE0033] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-stone-50'
@@ -282,6 +295,16 @@ function AppContent() {
             >
               <Fuel className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Biểu Giá Xăng Dầu PVOIL</span>
+              <span
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                  activeTab === 'pvoil'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>{input.currentDieselPrice.toLocaleString()} đ</span>
+              </span>
             </button>
             {isAdmin && (
               <button

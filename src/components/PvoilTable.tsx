@@ -24,7 +24,7 @@ export const PvoilTable: React.FC<PvoilTableProps> = ({
   currentDieselPrice,
   selectedZone,
   products = DEFAULT_PRODUCTS,
-  effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 29/10/2026',
+  effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 05/11/2026',
   sourceUrl = 'https://www.pvoil.com.vn/tin-gia-xang-dau',
   dateOptions = [],
   selectedDate = '',
