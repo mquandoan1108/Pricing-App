@@ -4,7 +4,6 @@ import { CalculatorForm } from './components/CalculatorForm';
 import { PriceResultCard } from './components/PriceResultCard';
 import { PvoilTable } from './components/PvoilTable';
 import { PvoilApiChecker } from './components/PvoilApiChecker';
-import { PetrolimexApiChecker } from './components/PetrolimexApiChecker';
 import { VehicleComparisonModal } from './components/VehicleComparisonModal';
 import { QuotationModal } from './components/QuotationModal';
 import { HistoryDrawer, HistoryItem } from './components/HistoryDrawer';
@@ -60,7 +59,6 @@ function AppContent() {
   // Modal / Drawer visibility states
   const [activeTab, setActiveTab] = useState<'calculator' | 'pvoil' | 'personnel'>('calculator');
   const [isApiCheckerOpen, setIsApiCheckerOpen] = useState(false);
-  const [isPetrolimexCheckerOpen, setIsPetrolimexCheckerOpen] = useState(false);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   const [isQuotationOpen, setIsQuotationOpen] = useState(false);
   const [quotationMode, setQuotationMode] = useState<'customer' | 'internal'>('customer');
@@ -335,14 +333,6 @@ function AppContent() {
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
               <span>Bảng Đơn Giá Gốc (Phụ Lục 1 &amp; 2)</span>
             </button>
-
-            <button
-              onClick={() => setIsPetrolimexCheckerOpen(true)}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 bg-white hover:bg-stone-50 border border-stone-200 shadow-2xs transition hover:border-amber-400"
-            >
-              <ShieldCheck className="w-4 h-4 text-amber-500" />
-              <span>Kiểm tra API Petrolimex</span>
-            </button>
           </div>
         </div>
 
@@ -472,11 +462,6 @@ function AppContent() {
       <PvoilApiChecker
         isOpen={isApiCheckerOpen}
         onClose={() => setIsApiCheckerOpen(false)}
-      />
-
-      <PetrolimexApiChecker
-        isOpen={isPetrolimexCheckerOpen}
-        onClose={() => setIsPetrolimexCheckerOpen(false)}
       />
 
       <VehicleComparisonModal
