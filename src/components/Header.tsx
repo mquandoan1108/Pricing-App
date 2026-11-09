@@ -19,6 +19,7 @@ interface HeaderProps {
   user?: AuthUser | null;
   isAdmin?: boolean;
   pendingCount?: number;
+  usersCount?: number;
   onOpenFuelTable: () => void;
   onOpenApiChecker: () => void;
   onOpenHistory: () => void;
@@ -35,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   isAdmin,
   pendingCount = 0,
+  usersCount = 17,
   onOpenFuelTable,
   onOpenApiChecker,
   onOpenHistory,
@@ -144,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </span>
                   ) : (
                     <span className="px-1.5 py-0.2 rounded-full bg-slate-700 text-slate-200 text-[9px] font-bold">
-                      15
+                      {usersCount}
                     </span>
                   )}
                 </button>

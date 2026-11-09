@@ -36,6 +36,8 @@ const INITIAL_USERS = [
   { id: 'u-13', email: 'duysteven31994@gmail.com', fullName: 'Quang Duy', role: 'user', status: 'active', password: DEFAULT_PASSWORD, createdAt: '2026-10-20T08:00:00.000Z', department: 'Kinh doanh Vận chuyển Cont' },
   { id: 'u-14', email: 'itranducbinh@gmail.com', fullName: 'Đức Bình', role: 'user', status: 'active', password: DEFAULT_PASSWORD, createdAt: '2026-10-20T08:00:00.000Z', department: 'Kỹ thuật Xe & Giám sát' },
   { id: 'u-15', email: 'imphantienloc@gmail.com', fullName: 'Tiến Lộc', role: 'user', status: 'active', password: DEFAULT_PASSWORD, createdAt: '2026-10-20T08:00:00.000Z', department: 'Điều phối Xe Đông Lạnh' },
+  { id: 'u-16', email: 'daogianghi11a11@gmail.com', fullName: 'Gia Nghi', role: 'user', status: 'active', password: DEFAULT_PASSWORD, createdAt: '2026-11-01T08:00:00.000Z', department: 'Kinh doanh Dịch vụ Vận tải' },
+  { id: 'u-17', email: 'inguyen.minhdat@gmail.com', fullName: 'Minh Đạt', role: 'user', status: 'active', password: DEFAULT_PASSWORD, createdAt: '2026-11-01T08:00:00.000Z', department: 'Điều hành Vận hành Logistics' },
 ];
 
 function initDatabase() {
@@ -46,14 +48,19 @@ function initDatabase() {
     if (!fs.existsSync(USERS_FILE)) {
       fs.writeFileSync(USERS_FILE, JSON.stringify(INITIAL_USERS, null, 2), 'utf-8');
     } else {
-      // Synchronize initial user display names if changed
+      // Synchronize initial users list & display names
       try {
         const existingUsers: any[] = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
         let modified = false;
         for (const initU of INITIAL_USERS) {
           const match = existingUsers.find((u) => u.email.toLowerCase() === initU.email.toLowerCase());
-          if (match && match.fullName !== initU.fullName) {
-            match.fullName = initU.fullName;
+          if (match) {
+            if (match.fullName !== initU.fullName) {
+              match.fullName = initU.fullName;
+              modified = true;
+            }
+          } else {
+            existingUsers.push(initU);
             modified = true;
           }
         }

@@ -66,7 +66,7 @@ function AppContent() {
   const [isPhuLucOpen, setIsPhuLucOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [usersCount, setUsersCount] = useState(15);
+  const [usersCount, setUsersCount] = useState(17);
   const [phuLucInitialTab, setPhuLucInitialTab] = useState<VehicleCategory>('truck_dry');
   const [isRefreshingFuel, setIsRefreshingFuel] = useState(false);
 
@@ -252,6 +252,7 @@ function AppContent() {
         user={user}
         isAdmin={isAdmin}
         pendingCount={pendingCount}
+        usersCount={usersCount}
         onOpenFuelTable={() => setActiveTab('pvoil')}
         onOpenApiChecker={() => setIsApiCheckerOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
