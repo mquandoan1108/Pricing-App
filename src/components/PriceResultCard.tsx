@@ -164,7 +164,7 @@ Căn cứ: ${result.vehicle.category === 'truck_reefer' ? 'Phụ lục 2 (Xe L�
             Mức lợi nhuận mong muốn:
           </span>
           <span className="font-bold text-red-600 font-mono">
-            +{activeProfit}% {activeProfit > 0 && `(+${formatCurrency(result.profitAmount)})`}
+            Biên {activeProfit}% {activeProfit > 0 && `(+${formatCurrency(result.profitAmount)})`}
           </span>
         </div>
 
@@ -297,7 +297,7 @@ Căn cứ: ${result.vehicle.category === 'truck_reefer' ? 'Phụ lục 2 (Xe L�
               <span className="font-mono font-bold text-slate-900">{formatCurrency(result.totalWithVat)}</span>
             </div>
             <div className="flex items-center justify-between text-slate-600 mt-1">
-              <span>Lợi nhuận đề xuất (+{activeProfit}%):</span>
+              <span>Lợi nhuận đề xuất ({activeProfit}% biên giá bán):</span>
               <span className="font-mono font-bold text-emerald-700">+{formatCurrency(result.profitAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-slate-900 font-extrabold text-sm pt-2 mt-2 border-t border-stone-200">

@@ -591,7 +591,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 14607,
     northSouthTwoWayG0: 18258,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.0,
+    coolingFuelPerHour: 1.5,
     description: 'Xe lạnh 2.500Kg - 2 lái - Nội Vùng, Nội Tỉnh (Phụ lục 2)',
   },
   {
@@ -613,7 +613,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 15149,
     northSouthTwoWayG0: 18936,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.8,
+    coolingFuelPerHour: 3.0,
     description: 'Xe lạnh 5.000Kg - 2 lái - Nội Vùng, Nội Tỉnh (Phụ lục 2)',
   },
   {
@@ -659,7 +659,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 12308,
     northSouthTwoWayG0: 15385,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.0,
+    coolingFuelPerHour: 1.5,
     description: 'Xe lạnh 2.500Kg - 1 lái - Nội Vùng, Nội Tỉnh (Phụ lục 2)',
   },
   {
@@ -681,7 +681,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 13020,
     northSouthTwoWayG0: 16275,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.8,
+    coolingFuelPerHour: 3.0,
     description: 'Xe lạnh 5.000Kg - 1 lái - Nội Vùng, Nội Tỉnh (Phụ lục 2)',
   },
   {
@@ -750,8 +750,8 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 18241,
     northSouthTwoWayG0: 22801,
     oilFactorK: 0.40,
-    coolingFuelPerHour: 5.0,
-    description: 'Xe lạnh 28.000kg tiêu chuẩn - 2 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
+    coolingFuelPerHour: 3.5,
+    description: 'Xe lạnh 28.000kg tiêu chuẩn (cont) - 2 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
   },
   {
     id: 'reefer_2d_bn_28000kg_ck',
@@ -773,8 +773,8 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 20470,
     northSouthTwoWayG0: 25587,
     oilFactorK: 0.40,
-    coolingFuelPerHour: 5.2,
-    description: 'Xe lạnh 28.000kg cửa khẩu - 2 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
+    coolingFuelPerHour: 3.5,
+    description: 'Xe lạnh 28.000kg cửa khẩu (cont) - 2 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
   },
 
   // --- Nhóm 4: Xe lạnh 1 lái/xe (8001 - >18000kg) - Loại hình: Bắc Nam, Cận Vùng ---
@@ -820,8 +820,8 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 17789,
     northSouthTwoWayG0: 22237,
     oilFactorK: 0.40,
-    coolingFuelPerHour: 5.0,
-    description: 'Xe lạnh 28.000kg tiêu chuẩn - 1 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
+    coolingFuelPerHour: 3.5,
+    description: 'Xe lạnh 28.000kg tiêu chuẩn (cont) - 1 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
   },
   {
     id: 'reefer_1d_bn_28000kg_ck',
@@ -843,8 +843,8 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 19647,
     northSouthTwoWayG0: 24558,
     oilFactorK: 0.40,
-    coolingFuelPerHour: 5.2,
-    description: 'Xe lạnh 28.000kg cửa khẩu - 1 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
+    coolingFuelPerHour: 3.5,
+    description: 'Xe lạnh 28.000kg cửa khẩu (cont) - 1 lái - Bắc Nam, Cận Vùng (Phụ lục 2)',
   },
 
   // --- Nhóm 5: Xe lạnh 2 lái/xe (Ngắt lạnh) - Loại hình: Bắc Nam, Cận Vùng ---
@@ -919,7 +919,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 14607,
     northSouthTwoWayG0: 18258,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.0,
+    coolingFuelPerHour: 1.5,
     description: 'Xe lạnh 2.500Kg - 2 lái (Phụ lục 2)',
   },
   {
@@ -941,7 +941,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 15149,
     northSouthTwoWayG0: 18936,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.8,
+    coolingFuelPerHour: 3.0,
     description: 'Xe lạnh 5.000Kg - 2 lái (Phụ lục 2)',
   },
   {
@@ -963,7 +963,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 12308,
     northSouthTwoWayG0: 15385,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.0,
+    coolingFuelPerHour: 1.5,
     description: 'Xe lạnh 2.500Kg - 1 lái (Phụ lục 2)',
   },
   {
@@ -985,7 +985,7 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 13020,
     northSouthTwoWayG0: 16275,
     oilFactorK: 0.25,
-    coolingFuelPerHour: 2.8,
+    coolingFuelPerHour: 3.0,
     description: 'Xe lạnh 5.000Kg - 1 lái (Phụ lục 2)',
   },
   {
@@ -1008,8 +1008,8 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     northSouthInG0: 18241,
     northSouthTwoWayG0: 22801,
     oilFactorK: 0.40,
-    coolingFuelPerHour: 5.0,
-    description: 'Xe lạnh 28.000kg tiêu chuẩn - 2 lái (Phụ lục 2)',
+    coolingFuelPerHour: 3.5,
+    description: 'Xe lạnh 28.000kg tiêu chuẩn (cont) - 2 lái (Phụ lục 2)',
   },
   {
     id: 'dry_2d_2500kg',
@@ -1121,13 +1121,13 @@ export const CONNECTION_TYPE_LABELS: Record<string, { label: string; sub: string
   },
 };
 
-export const STORAGE_CUSTOM_VEHICLES_KEY = 'vt_custom_vehicle_options_v7_phuluc1_phuluc2_exact';
+export const STORAGE_CUSTOM_VEHICLES_KEY = 'vt_custom_vehicle_options_v8_cooling_rates';
 
 export function getEffectiveVehicleOptions(): VehicleOption[] {
   if (typeof window === 'undefined') return VEHICLE_OPTIONS;
   try {
     // Purge outdated caches from prior versions to ensure latest official pricing is loaded
-    ['vt_custom_vehicle_options_v6_phuluc2_exact', 'vt_custom_vehicle_options_v5', 'vt_custom_vehicle_options_v4_phuluc2', 'vt_custom_vehicle_options_v3', 'vt_custom_vehicle_options_v2', 'vt_custom_vehicle_options_v1'].forEach((k) => {
+    ['vt_custom_vehicle_options_v7_phuluc1_phuluc2_exact', 'vt_custom_vehicle_options_v6_phuluc2_exact', 'vt_custom_vehicle_options_v5', 'vt_custom_vehicle_options_v4_phuluc2', 'vt_custom_vehicle_options_v3', 'vt_custom_vehicle_options_v2', 'vt_custom_vehicle_options_v1'].forEach((k) => {
       if (localStorage.getItem(k)) localStorage.removeItem(k);
     });
 

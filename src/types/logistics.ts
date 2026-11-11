@@ -121,8 +121,8 @@ export interface CalculationResult {
   
   // Mức lợi nhuận mong muốn & Báo giá khách hàng
   profitMarginPercent: number; // 0, 5, 10, 15, 20, 25 (%)
-  profitAmount: number; // Tiền lợi nhuận
-  customerSubtotalBeforeVat: number; // Giá bán trước VAT = subtotalBeforeVat + profitAmount
+  profitAmount: number; // Tiền lợi nhuận = customerSubtotalBeforeVat - subtotalBeforeVat
+  customerSubtotalBeforeVat: number; // Giá bán trước VAT = subtotalBeforeVat / (1 - %lợi nhuận)
   customerVatAmount: number; // VAT tính trên giá bán khách hàng
   customerTotalWithVat: number; // Tổng cước khách hàng thanh toán (có lợi nhuận)
 

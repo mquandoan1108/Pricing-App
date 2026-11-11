@@ -81,7 +81,7 @@ export function calculateFreightPrice(input: CalculationInput, customVehicles?: 
   let coolingCost = 0;
   if (vehicle.category === 'truck_reefer') {
     const hours = Math.max(0, Number(input.coolingHours) || 0);
-    const fuelRate = vehicle.coolingFuelPerHour || 2.5; // lít/giờ
+    const fuelRate = typeof vehicle.coolingFuelPerHour === 'number' ? vehicle.coolingFuelPerHour : 3.5; // lít/giờ
     coolingCost = Math.round(currentDiesel * fuelRate * hours);
   }
 
@@ -109,9 +109,17 @@ export function calculateFreightPrice(input: CalculationInput, customVehicles?: 
   const totalWithVat = Math.round(subtotalBeforeVat + vatAmount);
 
   // 11. Mức lợi nhuận mong muốn (5% -> 25%, bước nhảy 5%)
+  // Công thức chuẩn: Giá bán = Giá vốn / (1 - %lợi nhuận)
   const profitMarginPercent = Number(input.profitMarginPercent ?? 10);
-  const profitAmount = Math.round(subtotalBeforeVat * (profitMarginPercent / 100));
-  const customerSubtotalBeforeVat = Math.round(subtotalBeforeVat + profitAmount);
+  const marginRatio = Math.min(Math.max(profitMarginPercent, 0), 99) / 100;
+
+  let customerSubtotalBeforeVat: number;
+  if (marginRatio > 0 && marginRatio < 1) {
+    customerSubtotalBeforeVat = Math.round(subtotalBeforeVat / (1 - marginRatio));
+  } else {
+    customerSubtotalBeforeVat = subtotalBeforeVat;
+  }
+  const profitAmount = Math.max(0, customerSubtotalBeforeVat - subtotalBeforeVat);
   const customerVatAmount = Math.round(customerSubtotalBeforeVat * (vatRate / 100));
   const customerTotalWithVat = Math.round(customerSubtotalBeforeVat + customerVatAmount);
 

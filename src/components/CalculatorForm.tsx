@@ -855,7 +855,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             <label htmlFor={coolingHoursInputId} className="block text-xs font-semibold text-slate-600 mb-1.5 flex items-center justify-between">
               <span>Thời gian chạy lạnh (h):</span>
               <span className="text-cyan-700 text-[10px]">
-                {input.vehicleCategory === 'truck_reefer' ? `${selectedVehicle.coolingFuelPerHour || 2.5} lít/h` : 'Xe nóng không áp dụng'}
+                {input.vehicleCategory === 'truck_reefer' ? `${typeof selectedVehicle.coolingFuelPerHour === 'number' ? selectedVehicle.coolingFuelPerHour : 3.5} lít/h` : 'Xe nóng không áp dụng'}
               </span>
             </label>
             <div className="relative">

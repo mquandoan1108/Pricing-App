@@ -413,7 +413,7 @@ Viettel Logistics.`;
                     {result.coolingCost > 0 && (
                       <tr>
                         <td className="border border-slate-300 py-2 px-3" colSpan={4}>
-                          Chi phí chạy máy lạnh ({input.coolingHours}h x {result.vehicle.coolingFuelPerHour}L/h x {formatCurrency(result.currentDieselPrice)})
+                          Chi phí chạy máy lạnh ({input.coolingHours}h x {typeof result.vehicle.coolingFuelPerHour === 'number' ? result.vehicle.coolingFuelPerHour : 3.5}L/h x {formatCurrency(result.currentDieselPrice)})
                         </td>
                         <td className="border border-slate-300 py-2 px-3 text-right font-medium">
                           {formatCurrency(result.coolingCost)}
@@ -441,7 +441,7 @@ Viettel Logistics.`;
                     {result.profitMarginPercent > 0 && (
                       <tr className="bg-emerald-50/60 font-semibold text-emerald-900">
                         <td className="border border-slate-300 py-2 px-3" colSpan={4}>
-                          Mức lợi nhuận mong muốn (+{result.profitMarginPercent}%)
+                          Mức lợi nhuận mong muốn ({result.profitMarginPercent}% biên giá bán)
                         </td>
                         <td className="border border-slate-300 py-2 px-3 text-right text-emerald-700 font-bold">
                           +{formatCurrency(result.profitAmount)}
