@@ -12,6 +12,17 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json());
 
+// Allow cross-origin requests from GitHub Pages / external deployments to /api/*
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Persistent user storage setup
 const DATA_DIR = path.resolve(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
@@ -512,7 +523,7 @@ function savePvoilCache(result: PvoilScrapedResult) {
 }
 
 // Scrape live data directly from https://www.pvoil.com.vn/tin-gia-xang-dau
-function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> {
+function fetchPvoilOriginOnce(targetDate?: string): Promise<PvoilScrapedResult> {
   return new Promise((resolve, reject) => {
     const isCustomDate = !!targetDate && targetDate.trim().length > 0;
     const reqPath = isCustomDate
@@ -525,13 +536,14 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
       path: reqPath,
       method: 'GET',
       rejectUnauthorized: false,
-      timeout: 5000,
+      timeout: 9000,
       headers: {
         Host: 'www.pvoil.com.vn',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'identity',
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
       },
@@ -539,6 +551,7 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
 
     const request = https.request(options, (response) => {
       let html = '';
+      response.setEncoding('utf8');
       response.on('data', (chunk) => {
         html += chunk;
       });
@@ -554,15 +567,15 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
 
           // Extract date options if on main page
           const dateOptions: Array<{ value: string; label: string }> = [];
-          const optRegex = /<option\s+value="([^"]+)">([^<]+)<\/option>/gi;
+          const optRegex = /<option\s+[^>]*value="([^"]+)"[^>]*>([^<]+)<\/option>/gi;
           let om;
           while ((om = optRegex.exec(html)) !== null) {
             dateOptions.push({ value: om[1], label: om[2].trim() });
           }
 
-          // Extract table rows
+          // Extract table rows (resilient against attributes on tr/td)
           const rowRegex =
-            /<tr>\s*<td>(\d+)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<\/tr>/gi;
+            /<tr[^>]*>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<\/tr>/gi;
           let rm;
           const items: PvoilScrapedItem[] = [];
           while ((rm = rowRegex.exec(html)) !== null) {
@@ -598,10 +611,94 @@ function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> 
     request.on('error', (err) => reject(err));
     request.on('timeout', () => {
       request.destroy();
-      reject(new Error('Quá thời gian kết nối máy chủ PVOIL (timeout 5s)'));
+      reject(new Error('Quá thời gian kết nối máy chủ PVOIL (timeout 9s)'));
     });
     request.end();
   });
+}
+
+// Live secondary mirror parser (via r.jina.ai -> giaxanghomnay.com PVOIL table) if direct origin IP fails
+function fetchPvoilFromMirror(): Promise<PvoilScrapedResult> {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      'https://r.jina.ai/https://giaxanghomnay.com/',
+      { timeout: 9000, headers: { 'User-Agent': 'Mozilla/5.0' } },
+      (res) => {
+        let md = '';
+        res.setEncoding('utf8');
+        res.on('data', (c) => (md += c));
+        res.on('end', () => {
+          if (res.statusCode !== 200 || !md.includes('giá theo PVOIL')) {
+            return reject(new Error(`Mirror status ${res.statusCode}`));
+          }
+          const pvoilSectionMatch = md.match(/giá theo PVOIL([\s\S]*?)Giá của PVOIL cập nhật/i);
+          if (!pvoilSectionMatch) {
+            return reject(new Error('Không tìm thấy bảng giá PVOIL từ mirror'));
+          }
+          const section = pvoilSectionMatch[1];
+          const items: PvoilScrapedItem[] = [];
+          const lines = section.split('\n');
+          for (const line of lines) {
+            if (!line.trim().startsWith('|') || line.includes('---') || line.includes('Xăng/dầu')) continue;
+            const cols = line.split('|').map((c) => c.trim()).filter(Boolean);
+            if (cols.length >= 4) {
+              const nameRaw = cols[0].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim();
+              const diffRaw = cols[2].replace(/,/g, '').trim();
+              const price = parseInt(cols[3].replace(/[^0-9]/g, ''), 10);
+              if (!isNaN(price) && price > 10000) {
+                items.push({
+                  name: nameRaw
+                    .replace(/DO 0,05S Mức 2/i, 'Dầu DO 0,05S-II')
+                    .replace(/DO 0,001S Mức 5/i, 'Dầu DO 0,001S-V')
+                    .replace(/RON 95 Mức 3/i, 'RON 95-III')
+                    .replace(/RON 92 Mức 2/i, 'RON 92-II'),
+                  price,
+                  diff: diffRaw,
+                });
+              }
+            }
+          }
+          if (items.length === 0) {
+            return reject(new Error('Không trích xuất được dữ liệu PVOIL từ mirror'));
+          }
+          const dateMatch = md.match(/Ngày\s+(\d{2}\/\d{2}\/\d{4})[\s\S]*?(\d{2}:\d{2})/);
+          const effectiveTime = dateMatch
+            ? `Giá điều chỉnh lúc ${dateMatch[2]} ngày ${dateMatch[1]}`
+            : 'Kỳ điều hành PVOIL mới nhất';
+
+          resolve({
+            effectiveTime,
+            sourceUrl: 'https://www.pvoil.com.vn/tin-gia-xang-dau',
+            dateOptions: [],
+            items,
+            rawHtmlLength: md.length,
+            fetchedAt: new Date().toISOString(),
+          });
+        });
+      }
+    );
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Mirror timeout'));
+    });
+  });
+}
+
+async function fetchPvoilFromOrigin(targetDate?: string): Promise<PvoilScrapedResult> {
+  try {
+    return await fetchPvoilOriginOnce(targetDate);
+  } catch (firstErr) {
+    // Quick 1x retry before falling back to live mirror
+    try {
+      return await fetchPvoilOriginOnce(targetDate);
+    } catch (secondErr) {
+      if (!targetDate) {
+        return await fetchPvoilFromMirror();
+      }
+      throw secondErr;
+    }
+  }
 }
 
 // Background auto-sync every 60s
@@ -610,13 +707,17 @@ setInterval(() => {
     .then((res) => {
       savePvoilCache(res);
     })
-    .catch((err) => {
+    .catch(() => {
       // background sync fail - silent fallback
     });
 }, 60 * 1000);
 
 // Endpoint lấy dữ liệu giá xăng dầu PVOil trực tiếp từ https://www.pvoil.com.vn/tin-gia-xang-dau theo thời gian thực
 app.get('/api/pvoil/prices', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   const targetDate = typeof req.query.date === 'string' ? req.query.date.trim() : undefined;
   const forceRefresh = req.query.refresh === 'true' || req.query.refresh === '1';
 
@@ -651,16 +752,16 @@ app.get('/api/pvoil/prices', async (req, res) => {
       }
     }
 
-    // Current latest prices on PVOIL: 05/11/2026 (Giảm)
-    let do05Price = 28690;
-    let do001Price = 30090;
-    let ron95Price = 21150;
-    let ron92Price = 20890;
-    let do05Diff = '-180';
-    let do001Diff = '-180';
-    let ron95Diff = '-2080';
-    let ron92Diff = '-2310';
-    let effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 05/11/2026';
+    // Fallback latest known PVOIL prices (12/11/2026)
+    let do05Price = 26820;
+    let do001Price = 28620;
+    let ron95Price = 19840;
+    let ron92Price = 19390;
+    let do05Diff = '-1870';
+    let do001Diff = '-1470';
+    let ron95Diff = '-1310';
+    let ron92Diff = '-1500';
+    let effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 12/11/2026';
     let dateOptions: Array<{ value: string; label: string }> = [];
 
     if (scraped?.items?.length) {
@@ -673,11 +774,11 @@ app.get('/api/pvoil/prices', async (req, res) => {
       }
 
       for (const it of scraped.items) {
-        if (it.name.includes('0,05S')) {
+        if (it.name.includes('0,05S') || it.name.includes('0.05S')) {
           do05Price = it.price;
           do05Diff = it.diff;
         }
-        if (it.name.includes('0,001S')) {
+        if (it.name.includes('0,001S') || it.name.includes('0.001S')) {
           do001Price = it.price;
           do001Diff = it.diff;
         }
@@ -943,6 +1044,15 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server listening on http://0.0.0.0:${PORT}`);
+    // Pre-warm live PVOIL cache right on server startup
+    fetchPvoilFromOrigin()
+      .then((res) => {
+        savePvoilCache(res);
+        console.log(`[PVOIL] Initial sync complete: ${res.effectiveTime}`);
+      })
+      .catch((err) => {
+        console.warn('[PVOIL] Initial sync skipped:', err.message);
+      });
   });
 }
 

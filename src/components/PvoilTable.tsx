@@ -10,6 +10,7 @@ interface PvoilTableProps {
   selectedZone: 1 | 2;
   products?: PetrolimexProduct[];
   effectiveTime?: string;
+  lastSyncedAt?: string;
   sourceUrl?: string;
   dateOptions?: Array<{ value: string; label: string }>;
   selectedDate?: string;
@@ -24,7 +25,8 @@ export const PvoilTable: React.FC<PvoilTableProps> = ({
   currentDieselPrice,
   selectedZone,
   products = DEFAULT_PRODUCTS,
-  effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 05/11/2026',
+  effectiveTime = 'Giá điều chỉnh lúc 15:00 ngày 12/11/2026',
+  lastSyncedAt = '',
   sourceUrl = 'https://www.pvoil.com.vn/tin-gia-xang-dau',
   dateOptions = [],
   selectedDate = '',
@@ -75,6 +77,14 @@ export const PvoilTable: React.FC<PvoilTableProps> = ({
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
               <span>{effectiveTime}</span>
+              {lastSyncedAt && (
+                <>
+                  <span>•</span>
+                  <span className="text-emerald-700 font-medium">
+                    Đồng bộ lúc {new Date(lastSyncedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                </>
+              )}
               <span>•</span>
               <a
                 href={sourceUrl}
@@ -320,7 +330,7 @@ export const PvoilTable: React.FC<PvoilTableProps> = ({
                 type="text"
                 value={customPrice}
                 onChange={(e) => setCustomPrice(e.target.value)}
-                placeholder="30240"
+                placeholder="26820"
                 className="w-28 px-2.5 py-1 rounded-lg bg-white border border-stone-300 text-slate-900 font-bold text-xs focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <span className="text-slate-500 font-medium">đồng/lít</span>

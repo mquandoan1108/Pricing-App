@@ -1,7 +1,11 @@
 {
-  "effectiveTime": "Giá điều chỉnh lúc 15:00 ngày 05/11/2026",
+  "effectiveTime": "Giá điều chỉnh lúc 15:00 ngày 12/11/2026",
   "sourceUrl": "https://www.pvoil.com.vn/tin-gia-xang-dau",
   "dateOptions": [
+    {
+      "value": "2026-11-12",
+      "label": "12-11-2026"
+    },
     {
       "value": "2026-11-05",
       "label": "05-11-2026"
@@ -1259,29 +1263,29 @@
       "label": "22-08-2018"
     }
   ],
-  "currentDate": "2026-11-05",
+  "currentDate": "2026-11-12",
   "items": [
     {
       "name": "Xăng E10 RON 95-III",
-      "price": 21150,
-      "diff": "-2080"
+      "price": 19840,
+      "diff": "-1310"
     },
     {
       "name": "Xăng E5 RON 92-II",
-      "price": 20890,
-      "diff": "-2310"
+      "price": 19390,
+      "diff": "-1500"
     },
     {
       "name": "Dầu DO 0,05S-II",
-      "price": 28690,
-      "diff": "-180"
+      "price": 26820,
+      "diff": "-1870"
     },
     {
       "name": "Dầu DO 0,001S-V",
-      "price": 30090,
-      "diff": "-180"
+      "price": 28620,
+      "diff": "-1470"
     }
   ],
-  "rawHtmlLength": 38942,
-  "fetchedAt": "2026-11-09T03:38:09.328Z"
+  "rawHtmlLength": 38992,
+  "fetchedAt": "2026-11-13T06:50:49.572Z"
 }
